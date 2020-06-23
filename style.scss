@@ -1,0 +1,4 @@
+/* React crash I can't seem to fix. */
+.text-react-no-click * {
+	pointer-events: none !important;
+}
