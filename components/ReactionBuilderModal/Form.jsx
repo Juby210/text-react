@@ -63,6 +63,7 @@ class Form extends React.PureComponent {
 							channel={this.props.channel}
 							message={this.props.message}
 							emojiData={this.props.emojiData}
+							reacting={this.props.reacting}
 							update={this.props.update}
 						/>
 					) : (
@@ -119,7 +120,7 @@ class Preview extends React.PureComponent {
 
 		message.reactions = message.reactions.concat(reactions);
 
-		if (message.reactions.length != this.state.lastReactions.length) {
+		if (message.reactions.length != this.state.lastReactions.length && !this.props.reacting) {
 			this.setState({
 				lastReactions: message.reactions,
 			});

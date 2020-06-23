@@ -4,6 +4,7 @@ const { Modal } = require("powercord/components/modal");
 const { FormTitle } = require("powercord/components");
 const { close: closeModal } = require("powercord/modal");
 const { addReaction } = getModule(["addReaction"], false);
+const { getMessage } = getModule(["getMessages"], false);
 const Form = require("./Form");
 
 class ReactionBuilderModal extends React.PureComponent {
@@ -46,6 +47,27 @@ class ReactionBuilderModal extends React.PureComponent {
 				error: "",
 			});
 		}
+	};
+
+	componentDidMount() {
+		this.timerID = setInterval(() => this.tick(), 25e1);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.timerID);
+	}
+
+	tick = () => {
+		const message = getMessage(
+			this.state.message.channel_id,
+			this.state.message.id
+		);
+		if (!message) {
+			closeModal();
+		}
+		this.setState({
+			message,
+		});
 	};
 
 	setReacting = (reacting) => {
