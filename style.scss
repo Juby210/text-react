@@ -2,3 +2,10 @@
 .text-react-no-click * {
 	pointer-events: none !important;
 }
+
+.text-react-button {
+	filter: grayscale(100%);
+}
+.text-react-button:hover {
+	filter: grayscale(0%);
+}

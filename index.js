@@ -1,11 +1,17 @@
 const { Plugin } = require("powercord/entities");
 const { React, getModule } = require("powercord/webpack");
-const { open: openModal } = require("powercord/modal");
-const ReactionBuilderModal = require("./components/ReactionBuilderModal");
+const MiniPopover = getModule(
+	(m) => m.default && m.default.displayName === "MiniPopover",
+	false
+);
+const TextReactButton = require("./components/TextReactButton")(MiniPopover);
+const { findInReactTree } = require("powercord/util");
+const { inject, uninject } = require("powercord/injector");
 const { getMessage } = getModule(["getMessages"], false);
 const { getChannel } = getModule(["getChannel"], false);
-const { findInReactTree } = require('powercord/util');
-const { inject, uninject } = require('powercord/injector');
+const { getCurrentUser } = getModule(["getCurrentUser"], false);
+const DiscordPermissions = getModule(["Permissions"], false).Permissions;
+const Permissions = getModule(["getHighestRole"], false);
 
 const reactions = {
 	multiple: {
@@ -78,7 +84,7 @@ const reactions = {
 		"*": ["*️⃣"],
 		$: ["💲"],
 		"#": ["#️⃣"],
-		" ": ["▪️", "◾",  "➖", "◼️", "⬛", "⚫", "🖤", "🕶️"]
+		" ": ["▪️", "◾", "➖", "◼️", "⬛", "⚫", "🖤", "🕶️"],
 	},
 };
 
@@ -98,44 +104,37 @@ module.exports = class TextReact extends Plugin {
 	async startPlugin() {
 		this.loadStylesheet("style.scss");
 
-		const classes = {
-			...await getModule([ 'emojiButton' ]),
-			...await getModule([ 'icon', 'isHeader' ])
-		  };
-		  const reactionManager = await getModule([ 'addReaction' ]);
-		  const MiniPopover = await getModule(m => m.default && m.default.displayName === 'MiniPopover');
-		  inject('text-react', MiniPopover, 'default', (args, res) => {
-			const props = findInReactTree(res, r => r && r.canReact && r.message);
+		inject("text-react", MiniPopover, "default", (args, res) => {
+			const props = findInReactTree(
+				res,
+				(r) => r && r.canReact && r.message
+			);
 			if (!props) return res;
-	  
-			res.props.children.unshift(React.createElement(
-			  'div', {
-				className: `${classes.emojiButton} ${classes.button}`,
-				style: { cursor: 'pointer' },
-				onClick: () => {
-				  const message = getMessage(props.channel.id, props.message.id);
-				  const channel = getChannel(props.channel.id);
-	  
-				  setTimeout(() => {
-					openModal(() =>
-					  React.createElement(ReactionBuilderModal, {
+			const message = getMessage(props.channel.id, props.message.id);
+			const channel = getChannel(props.channel.id);
+
+			if (
+				Permissions.can(
+					DiscordPermissions.ADD_REACTIONS,
+					getCurrentUser(),
+					channel
+				) ||
+				channel.type == 1 || // DM
+				channel.type == 3 // Group DM
+			) {
+				res.props.children.unshift(
+					React.createElement(TextReactButton, {
+						...props,
 						channel,
 						message,
 						reactions,
 						allReactions,
-					  })
-					);
-				  }, 0);
-				}
-			  },
-			  React.createElement('img', {
-				className: `emoji ${classes.icon}`,
-				src: '/assets/bbe8ae762f831966587a35010ed46f67.svg'
-			  })
-			));
+					})
+				);
+			}
 			return res;
-		  });
-		  MiniPopover.default.displayName = 'MiniPopover';
+		});
+		MiniPopover.default.displayName = "MiniPopover";
 
 		/*
 		powercord.api.commands.registerCommand({
@@ -215,6 +214,6 @@ module.exports = class TextReact extends Plugin {
 	}
 
 	pluginWillUnload() {
-		uninject('text-react');
+		uninject("text-react");
 	}
 };
