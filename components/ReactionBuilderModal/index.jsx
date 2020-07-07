@@ -238,7 +238,7 @@ class ReactionBuilderModal extends React.PureComponent {
 					let oldString = string;
 					string = string.replace(
 						reactionName,
-						" " + reactionValues[0] + " "
+						">>TOKEN" + reactionValues[0] + ">>TOKEN"
 					);
 					if (string != oldString) {
 						unusedReactions.multiple[reactionName].splice(0, 1);
@@ -266,7 +266,7 @@ class ReactionBuilderModal extends React.PureComponent {
 					let oldString = string;
 					string = string.replace(
 						reactionName,
-						" " + reactionValues[0] + " "
+						">>TOKEN" + reactionValues[0] + ">>TOKEN"
 					);
 					if (string != oldString) {
 						unusedReactions.single[reactionName].splice(0, 1);
@@ -291,7 +291,7 @@ class ReactionBuilderModal extends React.PureComponent {
 		// If there are any, also mark the list as incomplete.
 		let emojis = string
 			.trim()
-			.split(" ")
+			.split(">>TOKEN")
 			.filter(function (el) {
 				return el != "";
 			});

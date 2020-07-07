@@ -2,9 +2,10 @@ const { Plugin } = require("powercord/entities");
 const { React, getModule } = require("powercord/webpack");
 const { open: openModal } = require("powercord/modal");
 const ReactionBuilderModal = require("./components/ReactionBuilderModal");
-const { getChannelId } = getModule(["getLastSelectedChannelId"], false);
-const { getMessages, getMessage } = getModule(["getMessages"], false);
+const { getMessage } = getModule(["getMessages"], false);
 const { getChannel } = getModule(["getChannel"], false);
+const { findInReactTree } = require('powercord/util');
+const { inject, uninject } = require('powercord/injector');
 
 const reactions = {
 	multiple: {
@@ -77,6 +78,7 @@ const reactions = {
 		"*": ["*️⃣"],
 		$: ["💲"],
 		"#": ["#️⃣"],
+		" ": ["▪️", "◾",  "➖", "◼️", "⬛", "⚫", "🖤", "🕶️"]
 	},
 };
 
@@ -96,6 +98,46 @@ module.exports = class TextReact extends Plugin {
 	async startPlugin() {
 		this.loadStylesheet("style.scss");
 
+		const classes = {
+			...await getModule([ 'emojiButton' ]),
+			...await getModule([ 'icon', 'isHeader' ])
+		  };
+		  const reactionManager = await getModule([ 'addReaction' ]);
+		  const MiniPopover = await getModule(m => m.default && m.default.displayName === 'MiniPopover');
+		  inject('text-react', MiniPopover, 'default', (args, res) => {
+			const props = findInReactTree(res, r => r && r.canReact && r.message);
+			if (!props) return res;
+	  
+			res.props.children.unshift(React.createElement(
+			  'div', {
+				className: `${classes.emojiButton} ${classes.button}`,
+				style: { cursor: 'pointer' },
+				onClick: () => {
+				  const message = getMessage(props.channel.id, props.message.id);
+				  const channel = getChannel(props.channel.id);
+	  
+				  setTimeout(() => {
+					openModal(() =>
+					  React.createElement(ReactionBuilderModal, {
+						channel,
+						message,
+						reactions,
+						allReactions,
+					  })
+					);
+				  }, 0);
+				}
+			  },
+			  React.createElement('img', {
+				className: `emoji ${classes.icon}`,
+				src: '/assets/bbe8ae762f831966587a35010ed46f67.svg'
+			  })
+			));
+			return res;
+		  });
+		  MiniPopover.default.displayName = 'MiniPopover';
+
+		/*
 		powercord.api.commands.registerCommand({
 			command: "react",
 			aliases: [],
@@ -124,22 +166,10 @@ module.exports = class TextReact extends Plugin {
 				}
 
 				const text = args[0];
-				const message = getMessage(channelid, messageid);
-				const channel = getChannel(channelid);
-
-				setTimeout(() => {
-					openModal(() =>
-						React.createElement(ReactionBuilderModal, {
-							channel,
-							message,
-							reactions,
-							allReactions,
-						})
-					);
-				}, 0);
+				
 			},
 		});
-
+		
 		this.registerCommand(
 			"react",
 			[],
@@ -181,9 +211,10 @@ module.exports = class TextReact extends Plugin {
 				}, 0);
 			}
 		);
+		*/
 	}
 
 	pluginWillUnload() {
-		powercord.api.commands.unregisterCommand("react");
+		uninject('text-react');
 	}
 };
