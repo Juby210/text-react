@@ -1,5 +1,7 @@
 const { Plugin } = require("powercord/entities");
 const { React, getModule } = require("powercord/webpack");
+const { open: openModal } = require("powercord/modal");
+const ReactionBuilderModal = require("./components/ReactionBuilderModal");
 const MiniPopover = getModule(
 	(m) => m.default && m.default.displayName === "MiniPopover",
 	false
@@ -7,8 +9,9 @@ const MiniPopover = getModule(
 const TextReactButton = require("./components/TextReactButton")(MiniPopover);
 const { findInReactTree } = require("powercord/util");
 const { inject, uninject } = require("powercord/injector");
-const { getMessage } = getModule(["getMessages"], false);
+const { getMessage, getMessages } = getModule(["getMessages"], false);
 const { getChannel } = getModule(["getChannel"], false);
+const { getChannelId } = getModule(["getLastSelectedChannelId"], false);
 const { getCurrentUser } = getModule(["getCurrentUser"], false);
 const DiscordPermissions = getModule(["Permissions"], false).Permissions;
 const Permissions = getModule(["getHighestRole"], false);
@@ -104,7 +107,7 @@ module.exports = class TextReact extends Plugin {
 	async startPlugin() {
 		this.loadStylesheet("style.scss");
 
-		inject("text-react", MiniPopover, "default", (args, res) => {
+		inject("text-react", MiniPopover, "default", (_, res) => {
 			const props = findInReactTree(
 				res,
 				(r) => r && r.canReact && r.message
@@ -113,15 +116,7 @@ module.exports = class TextReact extends Plugin {
 			const message = getMessage(props.channel.id, props.message.id);
 			const channel = getChannel(props.channel.id);
 
-			if (
-				Permissions.can(
-					DiscordPermissions.ADD_REACTIONS,
-					getCurrentUser(),
-					channel
-				) ||
-				channel.type == 1 || // DM
-				channel.type == 3 // Group DM
-			) {
+			if (this._canReact(channel)) {
 				res.props.children.unshift(
 					React.createElement(TextReactButton, {
 						...props,
@@ -136,16 +131,14 @@ module.exports = class TextReact extends Plugin {
 		});
 		MiniPopover.default.displayName = "MiniPopover";
 
-		/*
 		powercord.api.commands.registerCommand({
 			command: "react",
 			aliases: [],
 			description: "React on a message with regional indicators",
-			usage: "{c} <message id> [channel id]",
+			usage: "{c} [message id] [channel id]",
 			executor: async (args) => {
 				let messageid = args[0],
-					channelid = args[1] || getChannelId(),
-					limit = false;
+					channelid = args[1] || getChannelId();
 				if (!messageid) {
 					const messages = getMessages(channelid)._array;
 					if (messages.length == 0) {
@@ -164,56 +157,39 @@ module.exports = class TextReact extends Plugin {
 					};
 				}
 
-				const text = args[0];
-				
-			},
-		});
-		
-		this.registerCommand(
-			"react",
-			[],
-			"React on a message with regional indicators",
-			"{c} <message id> [channel id]",
-			async (args) => {
-				let messageid = args[0],
-					channelid = args[1] || getChannelId(),
-					limit = false;
-				if (!messageid) {
-					const messages = getMessages(channelid)._array;
-					if (messages.length == 0) {
-						return {
-							send: false,
-							result:
-								"Could not get last message ID, please enter message ID manually.",
-						};
-					}
-					messageid = messages[messages.length - 1].id;
-				}
-				if (!getMessage(channelid, messageid)) {
-					return {
-						send: false,
-						result: `Could not find a message with the ID \`${messageid}\`.`,
-					};
-				}
-
-				const text = args[0];
 				const message = getMessage(channelid, messageid);
+				const channel = getChannel(channelid);
+
+				if (!this._canReact(channel)) return {
+					result: `You don't have permissions to react in <#${channelid}> channel`
+				};
 
 				setTimeout(() => {
 					openModal(() =>
 						React.createElement(ReactionBuilderModal, {
+							channel,
 							message,
 							reactions,
 							allReactions,
 						})
 					);
 				}, 0);
-			}
-		);
-		*/
+			},
+		});
 	}
 
 	pluginWillUnload() {
 		uninject("text-react");
+		powercord.api.commands.unregisterCommand("react");
+	}
+
+	_canReact(channel) {
+		return Permissions.can(
+			DiscordPermissions.ADD_REACTIONS,
+			getCurrentUser(),
+			channel
+		) ||
+		channel.type == 1 || // DM
+		channel.type == 3 // Group DM
 	}
 };
