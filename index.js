@@ -1,18 +1,17 @@
 const { Plugin } = require("powercord/entities");
 const { React, getModule } = require("powercord/webpack");
 const { open: openModal } = require("powercord/modal");
+const { findInReactTree } = require("powercord/util");
+const { inject, uninject } = require("powercord/injector");
 const ReactionBuilderModal = require("./components/ReactionBuilderModal");
 const MiniPopover = getModule(
 	(m) => m.default && m.default.displayName === "MiniPopover",
 	false
 );
 const TextReactButton = require("./components/TextReactButton")(MiniPopover);
-const { findInReactTree } = require("powercord/util");
-const { inject, uninject } = require("powercord/injector");
 const { getMessage, getMessages } = getModule(["getMessages"], false);
 const { getChannel } = getModule(["getChannel"], false);
 const { getChannelId } = getModule(["getLastSelectedChannelId"], false);
-const { getCurrentUser } = getModule(["getCurrentUser"], false);
 const DiscordPermissions = getModule(["Permissions"], false).Permissions;
 const Permissions = getModule(["getHighestRole"], false);
 
@@ -186,7 +185,6 @@ module.exports = class TextReact extends Plugin {
 	_canReact(channel) {
 		return Permissions.can(
 			DiscordPermissions.ADD_REACTIONS,
-			getCurrentUser(),
 			channel
 		) ||
 		channel.type == 1 || // DM
