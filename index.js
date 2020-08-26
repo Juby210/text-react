@@ -180,6 +180,7 @@ module.exports = class TextReact extends Plugin {
 	pluginWillUnload() {
 		uninject("text-react");
 		powercord.api.commands.unregisterCommand("react");
+		document.querySelectorAll(".text-react-button").forEach(e => e.style.display = "none");
 	}
 
 	_canReact(channel) {
