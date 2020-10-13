@@ -14,6 +14,10 @@ const margins = getModule(["marginTop20"], false);
 
 class Form extends React.PureComponent {
 	render() {
+		if (!this.props.message) {
+			closeModal()
+			return null
+		}
 		return (
 			<React.Fragment>
 				<FormTitle tag="h5">Reaction Text</FormTitle>

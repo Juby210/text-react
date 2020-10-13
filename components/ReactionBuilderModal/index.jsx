@@ -58,6 +58,7 @@ class ReactionBuilderModal extends React.PureComponent {
 	}
 
 	tick = () => {
+		if (!this.state.message) return
 		const message = getMessage(
 			this.state.message.channel_id,
 			this.state.message.id
@@ -141,13 +142,9 @@ class ReactionBuilderModal extends React.PureComponent {
 	react = async () => {
 		for (let i = 0; i < this.state.emojiData.emojis.length; i++) {
 			let emoji = this.state.emojiData.emojis[i];
-			if (
-				!this.state.message.reactions.find(
-					(r) =>
-						r.emoji.name == this.state.message.reactions[emoji] &&
-						r.me
-				)
-			) {
+			if (this.state.message && !this.state.message.reactions?.find(r =>
+				r?.emoji?.name == this.state.message.reactions[emoji] && r?.me
+			)) {
 				addReaction(
 					this.state.message.channel_id,
 					this.state.message.id,

@@ -104,7 +104,7 @@ for (let i = 0; i < Object.keys(reactions.single).length; i++) {
 
 module.exports = class TextReact extends Plugin {
 	async startPlugin() {
-		this.loadStylesheet("style.scss");
+		this.loadStylesheet("style.css");
 
 		inject("text-react", MiniPopover, "default", (_, res) => {
 			const props = findInReactTree(
