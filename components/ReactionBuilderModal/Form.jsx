@@ -54,7 +54,7 @@ class Form extends React.PureComponent {
 					note="Whether or not to use combined character emojis first."
 					value={this.props.preferMultiple}
 					onChange={(event) => {
-						this.props.setPreferMultiple(event.target.checked);
+						this.props.setPreferMultiple(event);
 					}}
 				/>
 				<FormTitle tag="h5" className={margins.marginTop8}>
