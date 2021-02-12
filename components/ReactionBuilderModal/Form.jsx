@@ -121,6 +121,7 @@ class Preview extends React.PureComponent {
 
 		let channel = this.props.channel;
 		let message = JSON.parse(JSON.stringify(this.props.message));
+		message.getChannelId = () => message.channel_id
 
 		message.reactions = message.reactions.concat(reactions);
 
