@@ -27,13 +27,13 @@ class ReactionBuilderModal extends React.PureComponent {
 			let error = "";
 			if (emojiData.incomplete) {
 				error +=
-					"Could not find enough emojis to suit your text. Some characters will be left out.";
+					"Could not find enough emojis to suit your text. Some characters will be left out. ";
 			}
 			if (
 				emojiData.emojis.length + this.state.message.reactions.length >
 				20
 			) {
-				error += "Too many emojis. (MAX 20)";
+				error += "Too many emojis. (MAX 20) ";
 			}
 			this.setState({
 				text,
