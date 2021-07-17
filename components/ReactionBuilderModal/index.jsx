@@ -152,7 +152,7 @@ class ReactionBuilderModal extends React.PureComponent {
 						name: this.state.emojiData.emojis[i],
 					}
 				);
-				await new Promise((r) => setTimeout(r, 350)); // avoid ratelimit
+				await new Promise((r) => setTimeout(r, 1e3)); // avoid ratelimit
 			}
 		}
 	};
