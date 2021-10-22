@@ -1,5 +1,5 @@
 const { Plugin } = require("powercord/entities");
-const { React, getModule } = require("powercord/webpack");
+const { React, getModule, constants: { Permissions: DiscordPermissions } } = require("powercord/webpack");
 const { open: openModal } = require("powercord/modal");
 const { findInReactTree } = require("powercord/util");
 const { inject, uninject } = require("powercord/injector");
@@ -10,10 +10,9 @@ const MiniPopover = getModule(
 );
 const TextReactButton = require("./components/TextReactButton")(MiniPopover);
 const { getMessage, getMessages } = getModule(["getMessages"], false);
-const { getChannel } = getModule(["getChannel"], false);
+const { getChannel } = getModule(["getChannel", "getDMFromUserId"], false);
 const { getChannelId } = getModule(["getLastSelectedChannelId"], false);
-const DiscordPermissions = getModule(["Permissions"], false).Permissions;
-const Permissions = getModule(["getHighestRole"], false);
+const Permissions = getModule(["canManageUser", "getHighestRole"], false);
 
 const reactions = {
 	multiple: {
