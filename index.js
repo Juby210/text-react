@@ -9,7 +9,7 @@ const MiniPopover = getModule(
 	false
 );
 const TextReactButton = require("./components/TextReactButton")(MiniPopover);
-const { getMessage, getMessages } = getModule(["getMessages"], false);
+const { getMessage, getMessages } = getModule(["getRawMessages"], false);
 const { getChannel } = getModule(["getChannel", "getDMFromUserId"], false);
 const { getChannelId } = getModule(["getLastSelectedChannelId"], false);
 const Permissions = getModule(["canManageUser", "getHighestRole"], false);
