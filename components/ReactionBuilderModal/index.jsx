@@ -4,7 +4,7 @@ const { Modal } = require("powercord/components/modal");
 const { FormTitle } = require("powercord/components");
 const { close: closeModal } = require("powercord/modal");
 const { addReaction } = getModule(["addReaction"], false);
-const { getMessage } = getModule(["getMessages"], false);
+const { getMessage } = getModule(["getRawMessages"], false);
 const Form = require("./Form");
 
 class ReactionBuilderModal extends React.PureComponent {
